@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Test - Real-Time Stock Updates</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .form-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    #websocket-output {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Test WebSocket for Real-Time Stock Updates</h2>
+    <label for="websocket-symbol">Stock Symbol:</label>
+    <input
+      type="text"
+      id="websocket-symbol"
+      placeholder="Enter stock symbol (e.g., AAPL)"
+    />
+    <button onclick="startWebSocket()">Start WebSocket</button>
+    <button onclick="stopWebSocket()">Stop WebSocket</button>
+    <div id="websocket-output"></div>
+  </div>
+
+  <script>
+    let websocket = null;
+
+    function startWebSocket() {
+      const symbol = document.getElementById("websocket-symbol").value;
+      const output = document.getElementById("websocket-output");
+      output.innerHTML = ""; // Clear previous output
+
+      if (!symbol) {
+        output.innerHTML = `<p class="error">Error: Stock symbol is required.</p>`;
+        return;
+      }
+
+      websocket = new WebSocket(`ws://localhost:8000/analysis/ws?symbol=${symbol}`);
+
+      websocket.onopen = () => {
+        output.innerHTML += `<p>WebSocket connection established for symbol: ${symbol}.</p>`;
+      };
+
+      websocket.onmessage = (event) => {
+        const stockData = JSON.parse(event.data);
+        if (stockData.error) {
+          output.innerHTML += `<p class="error">Error: ${stockData.error}</p>`;
+        } else {
+          output.innerHTML += `<p>Symbol: ${stockData.symbol}, Price: ${stockData.current_price}, Timestamp: ${stockData.timestamp}</p>`;
+        }
+      };
+
+      websocket.onerror = (error) => {
+        output.innerHTML += `<p class="error">WebSocket error: ${error.message}</p>`;
+      };
+
+      websocket.onclose = () => {
+        output.innerHTML += `<p>WebSocket connection closed for symbol: ${symbol}.</p>`;
+      };
+    }
+
+    function stopWebSocket() {
+      const output = document.getElementById("websocket-output");
+      if (websocket) {
+        websocket.close();
+        websocket = null;
+        output.innerHTML += `<p>WebSocket connection stopped.</p>`;
+      } else {
+        output.innerHTML += `<p class="error">WebSocket is not running.</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

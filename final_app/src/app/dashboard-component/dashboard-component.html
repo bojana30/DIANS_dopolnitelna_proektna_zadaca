@@ -1,0 +1,32 @@
+<div class="dashboard-container">
+
+    <div class="sidebar">
+        <h3>Dashboard</h3>
+        <div class="controls">
+            <label>Stock Name:</label>
+            <input type="text" [(ngModel)]="symbol" placeholder="Enter stock name..." />
+            
+            <button (click)="followStock()">Follow Stock</button>
+
+            <label>Start Date:</label>
+            <input type="date" [(ngModel)]="startDate" />
+
+            <button (click)="fetchData()">Fetch Data</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-container">
+            <h4>Real-Time Stock Data {{symbol}}</h4>
+            <div class="chart-row">
+                <plotly-plot [data]="realTimePriceChart.data" [layout]="realTimePriceChart.layout"></plotly-plot>
+                <plotly-plot [data]="realTimeVolumeChart.data" [layout]="realTimeVolumeChart.layout"></plotly-plot>
+            </div>
+            <h4>Historical Stock Data {{symbol}}</h4>
+            <div class="chart-row">
+                <plotly-plot [data]="historicalPriceChart.data" [layout]="historicalPriceChart.layout"></plotly-plot>
+                <plotly-plot [data]="historicalVolumeChart.data" [layout]="historicalVolumeChart.layout"></plotly-plot>
+            </div>
+        </div>
+    </div>
+</div>
